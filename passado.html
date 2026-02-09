@@ -29,7 +29,7 @@ let html="";
 data.forEach(g=>{
 html+=`
 <div class="card">
-${g.home_team} x ${g.away_team}<br>
+${g.home_team} ${g.home_score} x ${g.away_score} ${g.away_team}<br>
 ${g.match_date}
 </div>`;
 });
