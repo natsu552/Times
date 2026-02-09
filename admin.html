@@ -29,7 +29,7 @@ const client = window.supabaseClient;
 
 async function checkLogin(){
 const { data:{user} } = await client.auth.getUser();
-if(!user) window.location="login.html";
+if(!user) window.location="admin.html";
 }
 checkLogin();
 
