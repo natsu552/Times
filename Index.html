@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Premier League</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+</head>
+<body>
+
+<header>
+<h2>Premier League</h2>
+<div>
+<button onclick="window.location='classificacao.html'">Tabela</button>
+<button onclick="window.location='passado.html'">Jogos Passados</button>
+<button onclick="window.location='admin.html'">Login</button>
+</div>
+</header>
+
+<div class="container">
+<h3>Próximos Jogos</h3>
+<div id="games"></div>
+</div>
+
+<script>
+async function loadGames(){
+    const { data } = await supabaseClient
+        .from("games")
+        .select("*")
+        .eq("status","assistir");
+
+    let html="";
+    data.forEach(g=>{
+        html+=`
+        <div class="card">
+        ${g.home_team} x ${g.away_team}<br>
+        Data: ${g.match_date}
+        </div>`;
+    });
+
+    games.innerHTML=html;
+}
+loadGames();
+</script>
+
+</body>
+</html>

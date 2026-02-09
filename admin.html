@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+</head>
+<body>
+
+<header>
+<h2>Painel Admin</h2>
+<button onclick="logout()">Sair</button>
+</header>
+
+<div class="container">
+<div id="content"></div>
+</div>
+
+<script>
+const client = window.supabaseClient;
+
+/* ================= CHECK LOGIN ================= */
+
+async function checkLogin(){
+const { data:{user} } = await client.auth.getUser();
+if(!user) window.location="login.html";
+}
+checkLogin();
+
+/* ================= MENU ================= */
+
+function showMenu(){
+content.innerHTML=`
+<h3>Admin</h3>
+<button onclick="showAddGame()">Adicionar Jogo</button>
+<button onclick="loadGames()">Editar Jogos</button>
+<hr>
+<button onclick="showAddTeam()">Adicionar Time</button>
+<button onclick="loadTable()">Editar Tabela</button>
+`;
+}
+showMenu();
+
+/* ================================================= */
+/* ================= JOGOS ========================= */
+/* ================================================= */
+
+function showAddGame(){
+content.innerHTML=`
+<h3>Novo Jogo</h3>
+<input id="home" placeholder="Time Casa">
+<input id="away" placeholder="Time Visitante">
+<input id="home_score" type="number" placeholder="Gols Casa">
+<input id="away_score" type="number" placeholder="Gols Visitante">
+<input id="date" placeholder="Data">
+<select id="status">
+<option value="assistir">Assistir</option>
+<option value="passado">Passado</option>
+</select>
+<button onclick="addGame()">Salvar</button>
+<button onclick="showMenu()">Voltar</button>
+`;
+}
+
+async function addGame(){
+await client.from("games").insert([{
+home_team: home.value,
+away_team: away.value,
+home_score: parseInt(home_score.value)||0,
+away_score: parseInt(away_score.value)||0,
+match_date: date.value,
+status: status.value
+}]);
+
+alert("Jogo salvo! Classificação atualizada automaticamente.");
+showMenu();
+}
+
+async function loadGames(){
+const {data}=await client.from("games").select("*");
+
+let html="<h3>Editar Jogos</h3>";
+
+data.forEach(g=>{
+html+=`
+<div class="card">
+<b>${g.home_team} ${g.home_score} x ${g.away_score} ${g.away_team}</b><br>
+${g.match_date} - ${g.status}<br><br>
+
+<button onclick="editGame('${g.id}','${g.home_team}','${g.away_team}',${g.home_score},${g.away_score},'${g.match_date}','${g.status}')">Editar</button>
+
+<button onclick="deleteGame('${g.id}')">Excluir</button>
+</div>`;
+});
+
+html+=`<button onclick="showMenu()">Voltar</button>`;
+content.innerHTML=html;
+}
+
+function editGame(id,home,away,hs,as,date,status){
+content.innerHTML=`
+<h3>Editar Jogo</h3>
+<input id="edit_home" value="${home}">
+<input id="edit_away" value="${away}">
+<input id="edit_home_score" type="number" value="${hs}">
+<input id="edit_away_score" type="number" value="${as}">
+<input id="edit_date" value="${date}">
+<select id="edit_status">
+<option value="assistir" ${status==="assistir"?"selected":""}>Assistir</option>
+<option value="passado" ${status==="passado"?"selected":""}>Passado</option>
+</select>
+<button onclick="updateGame('${id}')">Salvar</button>
+<button onclick="loadGames()">Cancelar</button>
+`;
+}
+
+async function updateGame(id){
+await client.from("games").update({
+home_team: edit_home.value,
+away_team: edit_away.value,
+home_score: parseInt(edit_home_score.value)||0,
+away_score: parseInt(edit_away_score.value)||0,
+match_date: edit_date.value,
+status: edit_status.value
+}).eq("id",id);
+
+alert("Atualizado! Se for passado, tabela recalculada.");
+showMenu();
+}
+
+async function deleteGame(id){
+await client.from("games").delete().eq("id",id);
+loadGames();
+}
+
+/* ================================================= */
+/* ================= TABELA ======================== */
+/* ================================================= */
+
+function showAddTeam(){
+content.innerHTML=`
+<h3>Adicionar Time</h3>
+<input id="team" placeholder="Nome">
+<button onclick="addTeam()">Salvar</button>
+<button onclick="showMenu()">Voltar</button>
+`;
+}
+
+async function addTeam(){
+await client.from("standings").insert([{ team: team.value }]);
+alert("Time criado!");
+showMenu();
+}
+
+async function loadTable(){
+const {data}=await client
+.from("standings")
+.select("*")
+.order("points",{ascending:false})
+.order("goal_difference",{ascending:false})
+.order("goals_for",{ascending:false});
+
+let html="<h3>Editar Tabela</h3>";
+
+data.forEach(t=>{
+html+=`
+<div class="card">
+<b>${t.team}</b><br>
+Pontos: ${t.points} |
+V: ${t.wins} |
+E: ${t.draws} |
+D: ${t.losses}<br>
+GP: ${t.goals_for} |
+GC: ${t.goals_against} |
+SG: ${t.goal_difference}
+</div>`;
+});
+
+html+=`<button onclick="showMenu()">Voltar</button>`;
+content.innerHTML=html;
+}
+
+/* ================= LOGOUT ================= */
+
+async function logout(){
+await client.auth.signOut();
+window.location="index.html";
+}
+</script>
+
+</body>
+</html>

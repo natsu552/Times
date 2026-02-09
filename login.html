@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Login Admin</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+</head>
+<body>
+
+<div class="container">
+<h2>Login Admin</h2>
+<input type="email" id="email" placeholder="Email">
+<input type="password" id="password" placeholder="Senha">
+<button onclick="login()">Entrar</button>
+</div>
+
+<script>
+async function login(){
+    const { error } = await supabaseClient.auth.signInWithPassword({
+        email: email.value,
+        password: password.value
+    });
+
+    if(error){
+        alert("Erro no login");
+    }else{
+        window.location="admin.html";
+    }
+}
+</script>
+
+</body>
+</html>

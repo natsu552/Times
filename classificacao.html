@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Classificação</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+</head>
+<body>
+
+<header>
+<h2>Classificação</h2>
+<button onclick="window.location='index.html'">Voltar</button>
+</header>
+
+<div class="container">
+
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Time</th>
+<th>P</th>
+<th>V</th>
+<th>E</th>
+<th>D</th>
+<th>GP</th>
+<th>GC</th>
+<th>SG</th>
+</tr>
+</thead>
+
+<tbody id="table"></tbody>
+
+</table>
+
+</div>
+
+<script>
+async function load(){
+
+const {data} = await supabaseClient
+.from("standings")
+.select("*")
+.order("points",{ascending:false})
+.order("goal_difference",{ascending:false})
+.order("goals_for",{ascending:false});
+
+let html="";
+
+data.forEach((t,i)=>{
+html+=`
+<tr>
+<td>${i+1}</td>
+<td>${t.team}</td>
+<td>${t.points}</td>
+<td>${t.wins}</td>
+<td>${t.draws}</td>
+<td>${t.losses}</td>
+<td>${t.goals_for}</td>
+<td>${t.goals_against}</td>
+<td>${t.goal_difference}</td>
+</tr>`;
+});
+
+table.innerHTML=html;
+}
+
+load();
+</script>
+
+</body>
+</html>

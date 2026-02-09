@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Jogos Passados</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+</head>
+<body>
+
+<header>
+<h2>Jogos Passados</h2>
+<button onclick="window.location='index.html'">Voltar</button>
+</header>
+
+<div class="container">
+<div id="past"></div>
+</div>
+
+<script>
+async function load(){
+const {data}=await supabaseClient
+.from("games")
+.select("*")
+.eq("status","passado");
+
+let html="";
+data.forEach(g=>{
+html+=`
+<div class="card">
+${g.home_team} x ${g.away_team}<br>
+${g.match_date}
+</div>`;
+});
+past.innerHTML=html;
+}
+load();
+</script>
+
+</body>
+</html>
